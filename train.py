@@ -1,9 +1,9 @@
 import os
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from model import char_rnn
 from utils import build_dataset,build_name_dataset,generate_batch
-
+tf.disable_eager_execution()
 # 参数设置
 tf.app.flags.DEFINE_integer('batch_size',64,'batch size.')
 tf.app.flags.DEFINE_float('learning_rate',0.01,'learning rate.')
@@ -18,18 +18,19 @@ FLAGS=tf.app.flags.FLAGS
 def train():
 
     # 创建结果保存的路径
-    if not os.path.exists(FLAGS.result_dir):
-        os.makedirs(FLAGS.result_dir)
-    if FLAGS.model_prefix=='poems':
-        poems_vector,word_to_int,vocabularies=build_dataset(FLAGS.file_path)
-    elif FLAGS.model_prefix=='names':
-        poems_vector,word_to_int,vocabularies=build_name_dataset(FLAGS.file_path)
+    #if not os.path.exists(FLAGS.result_dir):
+    #    os.makedirs(FLAGS.result_dir)
+    #if FLAGS.model_prefix=='poems':
+        #poems_vector,word_to_int,vocabularies=build_dataset(FLAGS.file_path)
+    #elif FLAGS.model_prefix=='names':
+
+    poems_vector,word_to_int,vocabularies=build_name_dataset(FLAGS.file_path)
 
     batches_inputs,batches_outputs=generate_batch(FLAGS.batch_size,poems_vector,word_to_int)
 
     input_data=tf.placeholder(tf.int32,[FLAGS.batch_size,None])
     output_targets=tf.placeholder(tf.int32,[FLAGS.batch_size,None])
-
+    #z = tf.log(output_targets, name="namemodel")
     end_points=char_rnn(model='lstm',
         input_data=input_data,
         output_data=output_targets,
@@ -68,7 +69,9 @@ def train():
         except KeyboardInterrupt:
             print('## Interrupt manually, try saving checkpoint for now...')
             saver.save(sess, os.path.join(FLAGS.result_dir, FLAGS.model_prefix), global_step=epoch)
-            print('## Last epoch were saved, next time will start from epoch {}.'.format(epoch))
+        saver.save(sess, "model.ckpt")
+        tf.train.write_graph(sess.graph_def, '', 'graph.pb')
+        print('## Last epoch were saved, next time will start from epoch {}.'.format(epoch))
 
 def main(_):
     train()

@@ -1,14 +1,26 @@
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from model import char_rnn
 from utils import build_name_dataset
 import numpy as np
-
+tf.disable_eager_execution()
 start_token = 'B'
 end_token = 'E'
 model_dir = 'result/name'
 corpus_file = 'data/names.txt'
 
 lr = 0.0002
+
+batch_size = 1
+print('## loading corpus from %s' % model_dir)
+names_vector, word_int_map, vocabularies = build_name_dataset(corpus_file)
+
+input_data = tf.placeholder(tf.int32, [batch_size, None])
+
+end_points = char_rnn(model='lstm', input_data=input_data, output_data=None, vocab_size=len(
+    vocabularies), rnn_size=128, num_layers=2, batch_size=128, learning_rate=lr)
+
+
+
 
 
 def to_word(predict, vocabs):
@@ -21,16 +33,8 @@ def to_word(predict, vocabs):
         return vocabs[sample]
 
 
+
 def gen_name(begin_word):
-    batch_size = 1
-    print('## loading corpus from %s' % model_dir)
-    names_vector, word_int_map, vocabularies = build_name_dataset(corpus_file)
-
-    input_data = tf.placeholder(tf.int32, [batch_size, None])
-
-    end_points = char_rnn(model='lstm', input_data=input_data, output_data=None, vocab_size=len(
-        vocabularies), rnn_size=128, num_layers=2, batch_size=128, learning_rate=lr)
-
     saver = tf.train.Saver(tf.global_variables())
     init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
     with tf.Session() as sess:
@@ -38,11 +42,11 @@ def gen_name(begin_word):
 
         checkpoint = tf.train.latest_checkpoint(model_dir)
         saver.restore(sess, checkpoint)
-
+        #g2def = tf.graph_util.convert_variables_to_constants(sess,sess.graph_def,checkpoint)
         x = np.array([list(map(word_int_map.get, start_token))])
 
         [predict, last_state] = sess.run([end_points['prediction'], end_points['last_state']],
-                                         feed_dict={input_data: x})
+                                       feed_dict={input_data: x})
         if begin_word:
             word = begin_word
         else:
@@ -70,6 +74,11 @@ def pretty_print_name(name_):
     
 
 if __name__ == '__main__':
-    begin_char = input('## 请输入您的姓氏:')
-    name = gen_name(begin_char)
-    pretty_print_name(name_=name)
+    count = 0
+    while(count < 9):
+        begin_char = input('## 请输入您的姓氏:')
+        countname = 0
+        while(countname < 9):
+            name = gen_name(begin_char)
+            pretty_print_name(name_=name)
+            countname +=1
