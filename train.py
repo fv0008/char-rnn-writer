@@ -17,14 +17,9 @@ FLAGS=tf.app.flags.FLAGS
 
 def train():
 
-    # 创建结果保存的路径
-    #if not os.path.exists(FLAGS.result_dir):
-    #    os.makedirs(FLAGS.result_dir)
-    #if FLAGS.model_prefix=='poems':
-        #poems_vector,word_to_int,vocabularies=build_dataset(FLAGS.file_path)
-    #elif FLAGS.model_prefix=='names':
 
-    poems_vector,word_to_int,vocabularies=build_name_dataset(FLAGS.file_path)
+    poems_vector, word_to_int, vocabularies = build_dataset(FLAGS.file_path)
+    #poems_vector,word_to_int,vocabularies=build_name_dataset(FLAGS.file_path)
 
     batches_inputs,batches_outputs=generate_batch(FLAGS.batch_size,poems_vector,word_to_int)
 
@@ -35,8 +30,8 @@ def train():
         input_data=input_data,
         output_data=output_targets,
         vocab_size=len(vocabularies),
-        rnn_size=256,
-        num_layers=3,
+        rnn_size=128,
+        num_layers=2,
         batch_size=FLAGS.batch_size,
         learning_rate=FLAGS.learning_rate)
 
@@ -70,8 +65,8 @@ def train():
             print('## Interrupt manually, try saving checkpoint for now...')
             saver.save(sess, os.path.join(FLAGS.result_dir, FLAGS.model_prefix), global_step=epoch)
             print('## Last epoch were saved, next time will start from epoch {}.'.format(epoch))
-        saver.save(sess, os.path.join(FLAGS.result_dir, FLAGS.model_prefix)+"model.ckpt")
-        tf.train.write_graph(sess.graph_def, FLAGS.result_dir, 'graph.pb')
+        saver.save(sess, os.path.join(FLAGS.result_dir, FLAGS.model_prefix)+'/model/'+"model.ckpt")
+        tf.train.write_graph(sess.graph_def, FLAGS.result_dir+'/model/', 'graph.pb')
 
 def main(_):
     train()

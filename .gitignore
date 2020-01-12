@@ -2,6 +2,7 @@
 .DS_Store
 .idea
 result/name
+result/poems
 checkpoint
 model.ckpt*
 graph.pb

@@ -1,14 +1,22 @@
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from model import char_rnn
 from utils import build_dataset
 import numpy as np
-
+tf.disable_eager_execution()
 start_token = 'B'
 end_token = 'E'
-model_dir = 'result/poem'
+model_dir = 'result/poems'
 corpus_file = 'data/poems.txt'
 
 lr = 0.0002
+batch_size = 1
+print('## loading corpus from %s' % model_dir)
+poems_vector, word_int_map, vocabularies = build_dataset(corpus_file)
+
+input_data = tf.placeholder(tf.int32, [batch_size, None])
+
+end_points = char_rnn(model='lstm', input_data=input_data, output_data=None, vocab_size=len(
+    vocabularies), rnn_size=128, num_layers=2, batch_size=64, learning_rate=lr)
 
 
 def to_word(predict, vocabs):
@@ -22,14 +30,7 @@ def to_word(predict, vocabs):
 
 
 def gen_poem(begin_word):
-    batch_size = 1
-    print('## loading corpus from %s' % model_dir)
-    poems_vector, word_int_map, vocabularies = build_dataset(corpus_file)
 
-    input_data = tf.placeholder(tf.int32, [batch_size, None])
-
-    end_points = char_rnn(model='lstm', input_data=input_data, output_data=None, vocab_size=len(
-        vocabularies), rnn_size=128, num_layers=2, batch_size=64, learning_rate=lr)
 
     saver = tf.train.Saver(tf.global_variables())
     init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
@@ -71,6 +72,14 @@ def pretty_print_poem(poem_):
             print(s + '。')
 
 if __name__ == '__main__':
-    begin_char = input('## please input the first character:')
-    poem = gen_poem(begin_char)
-    pretty_print_poem(poem_=poem)
+
+
+
+    count = 0
+    while (count < 9):
+        begin_char = input('## please input the first character:')
+        countname = 0
+        while (countname < 9999):
+            poem = gen_poem(begin_char)
+            pretty_print_poem(poem_=poem)
+            countname += 1
