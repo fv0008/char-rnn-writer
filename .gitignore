@@ -1,3 +1,8 @@
 
 .DS_Store
 .idea
+result/name
+checkpoint
+model.ckpt*
+graph.pb
+__pycache__

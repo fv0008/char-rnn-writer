@@ -17,7 +17,7 @@ names_vector, word_int_map, vocabularies = build_name_dataset(corpus_file)
 input_data = tf.placeholder(tf.int32, [batch_size, None])
 
 end_points = char_rnn(model='lstm', input_data=input_data, output_data=None, vocab_size=len(
-    vocabularies), rnn_size=128, num_layers=2, batch_size=128, learning_rate=lr)
+    vocabularies), rnn_size=256, num_layers=3, batch_size=128, learning_rate=lr)
 
 
 
@@ -71,6 +71,7 @@ def gen_name(begin_word):
 def pretty_print_name(name_):
     name= "".join([word for word in name_ if word!='B'])
     print(name)
+    return name
     
 
 if __name__ == '__main__':
@@ -78,7 +79,10 @@ if __name__ == '__main__':
     while(count < 9):
         begin_char = input('## 请输入您的姓氏:')
         countname = 0
-        while(countname < 9):
+        while(countname < 9999):
             name = gen_name(begin_char)
-            pretty_print_name(name_=name)
-            countname +=1
+            ret = pretty_print_name(name_=name)
+            countname += 1
+            if "李隆基"==ret:
+                countname = 9999
+                print(ret)

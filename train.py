@@ -10,7 +10,7 @@ tf.app.flags.DEFINE_float('learning_rate',0.01,'learning rate.')
 tf.app.flags.DEFINE_string('result_dir','result/poem','trained model save path.')
 tf.app.flags.DEFINE_string('file_path','data/poems.txt','file of poems dataset.')
 tf.app.flags.DEFINE_string('model_prefix','poems','model save prefix.')
-tf.app.flags.DEFINE_integer('epochs',50,'train how many epochs.')
+tf.app.flags.DEFINE_integer('epochs',51,'train how many epochs.')
 
 FLAGS=tf.app.flags.FLAGS
 
@@ -35,8 +35,8 @@ def train():
         input_data=input_data,
         output_data=output_targets,
         vocab_size=len(vocabularies),
-        rnn_size=128,
-        num_layers=2,
+        rnn_size=256,
+        num_layers=3,
         batch_size=FLAGS.batch_size,
         learning_rate=FLAGS.learning_rate)
 
@@ -69,9 +69,9 @@ def train():
         except KeyboardInterrupt:
             print('## Interrupt manually, try saving checkpoint for now...')
             saver.save(sess, os.path.join(FLAGS.result_dir, FLAGS.model_prefix), global_step=epoch)
-        saver.save(sess, "model.ckpt")
-        tf.train.write_graph(sess.graph_def, '', 'graph.pb')
-        print('## Last epoch were saved, next time will start from epoch {}.'.format(epoch))
+            print('## Last epoch were saved, next time will start from epoch {}.'.format(epoch))
+        saver.save(sess, os.path.join(FLAGS.result_dir, FLAGS.model_prefix)+"model.ckpt")
+        tf.train.write_graph(sess.graph_def, FLAGS.result_dir, 'graph.pb')
 
 def main(_):
     train()
