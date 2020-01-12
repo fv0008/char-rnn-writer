@@ -89,30 +89,31 @@ def build_name_dataset(filename):
     return poems_vector,word_to_int,words
 # poems_vector,word_to_int,words=build_dataset('data/demo.txt')
 
-def generate_batch(batch_size,poems_vector,word_to_int):
-    num_batch=len(poems_vector)//batch_size
-    x_batches=[]
-    y_batches=[]
 
-    for i in range(num_batch):
-        start_index=i*batch_size
-        end_index=(i+1)* batch_size
-
-        batches=poems_vector[start_index:end_index]
-        max_length=max(map(len,batches))
-        x_data=np.full((batch_size,max_length),word_to_int[' '],np.int32)
-        for row,batch in enumerate(batches):
-            x_data[row,:len(batch)]=batch
-        y_data=np.copy(x_data)
-        y_data[:,:-1]=y_data[:,1:]
-
-        """
-        x:3 12 13 14 15 16
-        y:12 13 14 15 16 0
-        """
-        x_batches.append(x_data)
-        y_batches.append(y_data)
-
-    return x_batches,y_batches
+# def generate_batch(batch_size,poems_vector,word_to_int):
+#     num_batch=len(poems_vector)//batch_size
+#     x_batches=[]
+#     y_batches=[]
+#
+#     for i in range(num_batch):
+#         start_index=i*batch_size
+#         end_index=(i+1)* batch_size
+#
+#         batches=poems_vector[start_index:end_index]
+#         max_length=max(map(len,batches))
+#         x_data=np.full((batch_size,max_length),word_to_int[' '],np.int32)
+#         for row,batch in enumerate(batches):
+#             x_data[row,:len(batch)]=batch
+#         y_data=np.copy(x_data)
+#         y_data[:,:-1]=y_data[:,1:]
+#
+#         """
+#         x:3 12 13 14 15 16
+#         y:12 13 14 15 16 0
+#         """
+#         x_batches.append(x_data)
+#         y_batches.append(y_data)
+#
+#     return x_batches,y_batches
 
 # generate_batch(1,poems_vector,word_to_int)
