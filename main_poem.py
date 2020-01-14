@@ -60,7 +60,7 @@ def write():
     while word != end_token:
         poem_ += word
         i += 1
-        if i >= 24:
+        if i >= 3:
             break
         x = np.zeros((1, 1))
         x[0, 0] = word_to_int[word]

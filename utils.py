@@ -1,21 +1,17 @@
 from collections import Counter
 import os
 import sys
+import time
+import _thread
 import numpy as np
 
 # 开始和结束标志
 start_token='B'
 end_token='E'
 
-def build_dataset(filename):
-    """
-    构建数据集 词典以及诗向量
-    :param filename: 诗集文件
-    :return:
-    """
-    poems=[]
+def threadpoems(poemsfile,poems):
     no_char = '_(（《['
-    with open(filename,'r',encoding='utf-8') as in_data:
+    with open(poemsfile,'r',encoding='utf-8') as in_data:
         for poem in in_data.readlines():
             try:
                 title,content=poem.strip().split(':') # 标题与内容
@@ -30,6 +26,35 @@ def build_dataset(filename):
                 poems.append(content)
             except ValueError as e:
                 pass
+def threadnames(namesfile,poems):
+    with open(namesfile, 'r', encoding='utf-8') as in_data:
+        for poem in in_data.readlines():
+            try:
+                content = poem.strip()  # 内容
+                content = content.replace(' ', '')  # 去除空格
+
+                if len(content) < 2 or len(content) > 5:  # 将不符合规定长度的去掉
+                    continue
+                content = start_token + content + end_token
+                poems.append(content)
+            except ValueError as e:
+                pass
+
+def build_dataset(poemsfile,namesfile):
+    """
+    构建数据集 词典以及诗向量
+    :param filename: 诗集文件
+    :return:
+    """
+    poems=[]
+
+    try:
+        _thread.start_new_thread(threadnames, (namesfile, poems,))
+        _thread.start_new_thread(threadpoems, (poemsfile, poems,))
+    except:
+        print("Error: 无法启动线程")
+
+    time.sleep(10)
     # print(poems)
     words_list=[word for poem in poems for word in poem] # 两层嵌套，插眼
     # print(words_list)
@@ -90,30 +115,30 @@ def build_name_dataset(filename):
 # poems_vector,word_to_int,words=build_dataset('data/demo.txt')
 
 
-# def generate_batch(batch_size,poems_vector,word_to_int):
-#     num_batch=len(poems_vector)//batch_size
-#     x_batches=[]
-#     y_batches=[]
-#
-#     for i in range(num_batch):
-#         start_index=i*batch_size
-#         end_index=(i+1)* batch_size
-#
-#         batches=poems_vector[start_index:end_index]
-#         max_length=max(map(len,batches))
-#         x_data=np.full((batch_size,max_length),word_to_int[' '],np.int32)
-#         for row,batch in enumerate(batches):
-#             x_data[row,:len(batch)]=batch
-#         y_data=np.copy(x_data)
-#         y_data[:,:-1]=y_data[:,1:]
-#
-#         """
-#         x:3 12 13 14 15 16
-#         y:12 13 14 15 16 0
-#         """
-#         x_batches.append(x_data)
-#         y_batches.append(y_data)
-#
-#     return x_batches,y_batches
+def generate_batch(batch_size,poems_vector,word_to_int):
+    num_batch=len(poems_vector)//batch_size
+    x_batches=[]
+    y_batches=[]
+
+    for i in range(num_batch):
+        start_index=i*batch_size
+        end_index=(i+1)* batch_size
+
+        batches=poems_vector[start_index:end_index]
+        max_length=max(map(len,batches))
+        x_data=np.full((batch_size,max_length),word_to_int[' '],np.int32)
+        for row,batch in enumerate(batches):
+            x_data[row,:len(batch)]=batch
+        y_data=np.copy(x_data)
+        y_data[:,:-1]=y_data[:,1:]
+
+        """
+        x:3 12 13 14 15 16
+        y:12 13 14 15 16 0
+        """
+        x_batches.append(x_data)
+        y_batches.append(y_data)
+
+    return x_batches,y_batches
 
 # generate_batch(1,poems_vector,word_to_int)

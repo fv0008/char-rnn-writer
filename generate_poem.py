@@ -5,13 +5,15 @@ import numpy as np
 tf.disable_eager_execution()
 start_token = 'B'
 end_token = 'E'
-model_dir = 'result/poems'
+model_dir = 'result/poem'
 corpus_file = 'data/poems.txt'
-
+tf.app.flags.DEFINE_string('poems_path','data/poems.txt','file of poems dataset.')
+tf.app.flags.DEFINE_string('name_path','data/names.txt','file of poems dataset.')
 lr = 0.0002
 batch_size = 1
 print('## loading corpus from %s' % model_dir)
-poems_vector, word_int_map, vocabularies = build_dataset(corpus_file)
+FLAGS=tf.app.flags.FLAGS
+poems_vector, word_int_map, vocabularies = build_dataset(FLAGS.poems_path,FLAGS.name_path)
 
 input_data = tf.placeholder(tf.int32, [batch_size, None])
 
@@ -64,6 +66,10 @@ def gen_poem(begin_word):
 
         return poem_
 
+def pretty_print_name(name_):
+    name= "".join([word for word in name_ if word!='B'])
+    print(name)
+    return name
 
 def pretty_print_poem(poem_):
     poem_sentences = poem_.split('。')
@@ -81,5 +87,5 @@ if __name__ == '__main__':
         countname = 0
         while (countname < 9999):
             poem = gen_poem(begin_char)
-            pretty_print_poem(poem_=poem)
+            pretty_print_name(name_=poem)
             countname += 1

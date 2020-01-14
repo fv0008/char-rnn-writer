@@ -8,7 +8,8 @@ tf.disable_eager_execution()
 tf.app.flags.DEFINE_integer('batch_size',64,'batch size.')
 tf.app.flags.DEFINE_float('learning_rate',0.01,'learning rate.')
 tf.app.flags.DEFINE_string('result_dir','result/poem','trained model save path.')
-tf.app.flags.DEFINE_string('file_path','data/poems.txt','file of poems dataset.')
+tf.app.flags.DEFINE_string('poems_path','data/poems.txt','file of poems dataset.')
+tf.app.flags.DEFINE_string('name_path','data/names.txt','file of poems dataset.')
 tf.app.flags.DEFINE_string('model_prefix','poems','model save prefix.')
 tf.app.flags.DEFINE_integer('epochs',51,'train how many epochs.')
 
@@ -18,8 +19,7 @@ FLAGS=tf.app.flags.FLAGS
 def train():
 
 
-    poems_vector, word_to_int, vocabularies = build_dataset(FLAGS.file_path)
-    #poems_vector,word_to_int,vocabularies=build_name_dataset(FLAGS.file_path)
+    poems_vector, word_to_int, vocabularies = build_dataset(FLAGS.poems_path,FLAGS.name_path)
 
     batches_inputs,batches_outputs=generate_batch(FLAGS.batch_size,poems_vector,word_to_int)
 
