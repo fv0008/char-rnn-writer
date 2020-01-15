@@ -30,8 +30,8 @@ def train():
         input_data=input_data,
         output_data=output_targets,
         vocab_size=len(vocabularies),
-        rnn_size=128,
-        num_layers=2,
+        rnn_size=512,
+        num_layers=4,
         batch_size=FLAGS.batch_size,
         learning_rate=FLAGS.learning_rate)
 
@@ -65,7 +65,7 @@ def train():
             print('## Interrupt manually, try saving checkpoint for now...')
             saver.save(sess, os.path.join(FLAGS.result_dir, FLAGS.model_prefix), global_step=epoch)
             print('## Last epoch were saved, next time will start from epoch {}.'.format(epoch))
-        saver.save(sess, os.path.join(FLAGS.result_dir, FLAGS.model_prefix)+'/model/'+"model.ckpt")
+        saver.save(sess, FLAGS.result_dir+'/model/'+"model.ckpt")
         tf.train.write_graph(sess.graph_def, FLAGS.result_dir+'/model/', 'graph.pb')
 
 def main(_):

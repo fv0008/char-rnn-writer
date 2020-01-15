@@ -18,7 +18,7 @@ poems_vector, word_int_map, vocabularies = build_dataset(FLAGS.poems_path,FLAGS.
 input_data = tf.placeholder(tf.int32, [batch_size, None])
 
 end_points = char_rnn(model='lstm', input_data=input_data, output_data=None, vocab_size=len(
-    vocabularies), rnn_size=128, num_layers=2, batch_size=64, learning_rate=lr)
+    vocabularies), rnn_size=512, num_layers=4, batch_size=64, learning_rate=lr)
 
 
 def to_word(predict, vocabs):
@@ -56,7 +56,7 @@ def gen_poem(begin_word):
         while word != end_token:
             poem_ += word
             i += 1
-            if i >= 24:
+            if i >= 4:
                 break
             x = np.zeros((1, 1))
             x[0, 0] = word_int_map[word]
