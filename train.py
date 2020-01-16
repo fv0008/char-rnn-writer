@@ -30,8 +30,8 @@ def train():
         input_data=input_data,
         output_data=output_targets,
         vocab_size=len(vocabularies),
-        rnn_size=512,
-        num_layers=4,
+        rnn_size=256,
+        num_layers=3,
         batch_size=FLAGS.batch_size,
         learning_rate=FLAGS.learning_rate)
 

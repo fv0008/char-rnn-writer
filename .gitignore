@@ -3,6 +3,7 @@
 .idea
 result/name
 result/poems
+result/poem
 checkpoint
 model.ckpt*
 graph.pb
