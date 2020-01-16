@@ -47,12 +47,10 @@ def build_dataset(poemsfile,namesfile):
     :return:
     """
     poems=[]
+    threadpoems(poemsfile, poems,)
+    threadnames(namesfile, poems,)
+    threadnames(namesfile, poems, )
 
-    try:
-        _thread.start_new_thread(threadnames, (namesfile, poems,))
-        _thread.start_new_thread(threadpoems, (poemsfile, poems,))
-    except:
-        print("Error: 无法启动线程")
 
     time.sleep(10)
     # print(poems)
