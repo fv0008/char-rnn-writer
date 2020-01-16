@@ -1,30 +1,20 @@
 import os
 import numpy as np
 import tensorflow.compat.v1 as tf
-from model import char_rnn
+from model import char_rnn,FLAGS
 from utils import build_dataset,build_name_dataset,generate_batch
 tf.disable_eager_execution()
-# 参数设置
-tf.app.flags.DEFINE_integer('batch_size',64,'batch size.')
-tf.app.flags.DEFINE_float('learning_rate',0.01,'learning rate.')
-tf.app.flags.DEFINE_string('result_dir','result/poem','trained model save path.')
-tf.app.flags.DEFINE_string('poems_path','data/poems.txt','file of poems dataset.')
-tf.app.flags.DEFINE_string('name_path','data/names.txt','file of poems dataset.')
-tf.app.flags.DEFINE_string('model_prefix','poems','model save prefix.')
-tf.app.flags.DEFINE_integer('epochs',51,'train how many epochs.')
 
-FLAGS=tf.app.flags.FLAGS
 
 
 def train():
+    FLAG = FLAGS()
+    poems_vector, word_to_int, vocabularies = build_dataset(FLAG.poems_path,FLAG.name_path)
 
+    batches_inputs,batches_outputs=generate_batch(FLAG.batch_size,poems_vector,word_to_int)
 
-    poems_vector, word_to_int, vocabularies = build_dataset(FLAGS.poems_path,FLAGS.name_path)
-
-    batches_inputs,batches_outputs=generate_batch(FLAGS.batch_size,poems_vector,word_to_int)
-
-    input_data=tf.placeholder(tf.int32,[FLAGS.batch_size,None])
-    output_targets=tf.placeholder(tf.int32,[FLAGS.batch_size,None])
+    input_data=tf.placeholder(tf.int32,[FLAG.batch_size,None])
+    output_targets=tf.placeholder(tf.int32,[FLAG.batch_size,None])
     #z = tf.log(output_targets, name="namemodel")
     end_points=char_rnn(model='lstm',
         input_data=input_data,
@@ -32,8 +22,8 @@ def train():
         vocab_size=len(vocabularies),
         rnn_size=256,
         num_layers=3,
-        batch_size=FLAGS.batch_size,
-        learning_rate=FLAGS.learning_rate)
+        batch_size=FLAG.batch_size,
+        learning_rate=FLAG.learning_rate)
 
     saver=tf.train.Saver(tf.global_variables())
     init_op=tf.group(tf.global_variables_initializer(),tf.local_variables_initializer())
@@ -41,16 +31,16 @@ def train():
         sess.run(init_op)
 
         start_epoch=0
-        checkpoint=tf.train.latest_checkpoint(FLAGS.result_dir)
+        checkpoint=tf.train.latest_checkpoint(FLAG.result_dir)
         if checkpoint: # 从上次结束的地方继续训练
             saver.restore(sess,checkpoint)
             print("## restore from the checkpoint {0}".format(checkpoint))
             start_epoch += int(checkpoint.split('-')[-1])
         print('## start training...')
         try:
-            for epoch in range(start_epoch,FLAGS.epochs):
+            for epoch in range(start_epoch,FLAG.epochs):
                 n=0
-                n_chunk = len(poems_vector) // FLAGS.batch_size
+                n_chunk = len(poems_vector) // FLAG.batch_size
                 for batch in range(n_chunk):
                     loss, _, _ = sess.run([
                         end_points['total_loss'],
@@ -60,13 +50,13 @@ def train():
                     n += 1
                     print('Epoch: %d, batch: %d, training loss: %.6f' % (epoch, batch, loss))
                 if epoch % 10 == 0:
-                    saver.save(sess, os.path.join(FLAGS.result_dir, FLAGS.model_prefix), global_step=epoch)
+                    saver.save(sess, os.path.join(FLAG.result_dir, FLAG.model_prefix), global_step=epoch)
         except KeyboardInterrupt:
             print('## Interrupt manually, try saving checkpoint for now...')
-            saver.save(sess, os.path.join(FLAGS.result_dir, FLAGS.model_prefix), global_step=epoch)
+            saver.save(sess, os.path.join(FLAG.result_dir, FLAG.model_prefix), global_step=epoch)
             print('## Last epoch were saved, next time will start from epoch {}.'.format(epoch))
-        saver.save(sess, FLAGS.result_dir+'/model/'+"model.ckpt")
-        tf.train.write_graph(sess.graph_def, FLAGS.result_dir+'/model/', 'graph.pb')
+        saver.save(sess, FLAG.result_dir+'/model/'+"model.ckpt")
+        tf.train.write_graph(sess.graph_def, FLAG.result_dir+'/model/', 'graph.pb')
 
 def main(_):
     train()

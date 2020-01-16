@@ -1,24 +1,14 @@
 import tensorflow.compat.v1 as tf
-from model import char_rnn
+from model import char_rnn,FLAGS
 from utils import build_dataset
 import numpy as np
 tf.disable_eager_execution()
-start_token = 'B'
-end_token = 'E'
-model_dir = 'result/poem'
-corpus_file = 'data/poems.txt'
-tf.app.flags.DEFINE_string('poems_path','data/poems.txt','file of poems dataset.')
-tf.app.flags.DEFINE_string('name_path','data/names.txt','file of poems dataset.')
-lr = 0.0002
-batch_size = 1
-print('## loading corpus from %s' % model_dir)
-FLAGS=tf.app.flags.FLAGS
-poems_vector, word_int_map, vocabularies = build_dataset(FLAGS.poems_path,FLAGS.name_path)
 
-input_data = tf.placeholder(tf.int32, [batch_size, None])
-
+FLAG=FLAGS()
+poems_vector, word_int_map, vocabularies = build_dataset(FLAG.poems_path,FLAG.name_path)
+input_data = tf.placeholder(tf.int32, [1, None])
 end_points = char_rnn(model='lstm', input_data=input_data, output_data=None, vocab_size=len(
-    vocabularies), rnn_size=256, num_layers=3, batch_size=64, learning_rate=lr)
+    vocabularies), rnn_size=256, num_layers=3, batch_size=64, learning_rate=FLAG.learning_rate)
 
 
 def to_word(predict, vocabs):
@@ -39,10 +29,10 @@ def gen_poem(begin_word):
     with tf.Session() as sess:
         sess.run(init_op)
 
-        checkpoint = tf.train.latest_checkpoint(model_dir)
+        checkpoint = tf.train.latest_checkpoint(FLAG.result_dir)
         saver.restore(sess, checkpoint)
 
-        x = np.array([list(map(word_int_map.get, start_token))])
+        x = np.array([list(map(word_int_map.get, FLAG.start_token))])
 
         [predict, last_state] = sess.run([end_points['prediction'], end_points['last_state']],
                                          feed_dict={input_data: x})
@@ -53,7 +43,7 @@ def gen_poem(begin_word):
         poem_ = ''
 
         i = 0
-        while word != end_token:
+        while word != FLAG.end_token:
             poem_ += word
             i += 1
             if i >= 3:
