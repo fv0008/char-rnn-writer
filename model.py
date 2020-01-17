@@ -63,7 +63,7 @@ def char_rnn(model,input_data,output_data,vocab_size,rnn_size=128,num_layers=2,b
     logits = tf.nn.bias_add(tf.matmul(output, weights), bias=bias)
     # [?, vocab_size+1]
 
-
+    prediction = tf.nn.softmax(logits)
     if output_data is not None:
         # 独热编码
         labels = tf.one_hot(tf.reshape(output_data, [-1]), depth=vocab_size + 1)
@@ -81,8 +81,9 @@ def char_rnn(model,input_data,output_data,vocab_size,rnn_size=128,num_layers=2,b
         end_points['total_loss'] = total_loss
         end_points['loss'] = loss
         end_points['last_state'] = last_state
+        end_points['prediction'] = prediction
     else:
-        prediction = tf.nn.softmax(logits)
+
 
         end_points['initial_state'] = initial_state
         end_points['last_state'] = last_state

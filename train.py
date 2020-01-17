@@ -13,7 +13,7 @@ def train():
 
     batches_inputs,batches_outputs=generate_batch(FLAG.batch_size,poems_vector,word_to_int)
 
-    input_data=tf.placeholder(tf.int32,[FLAG.batch_size,None])
+    input_data=tf.placeholder(tf.int32,[FLAG.batch_size,None],name="Input")
     output_targets=tf.placeholder(tf.int32,[FLAG.batch_size,None])
     #z = tf.log(output_targets, name="namemodel")
     end_points=char_rnn(model='lstm',
@@ -24,7 +24,7 @@ def train():
         num_layers=3,
         batch_size=FLAG.batch_size,
         learning_rate=FLAG.learning_rate)
-
+    y = tf.identity(end_points['prediction'], name="Output")  # 为输出op命名为"Output"
     saver=tf.train.Saver(tf.global_variables())
     init_op=tf.group(tf.global_variables_initializer(),tf.local_variables_initializer())
     with tf.Session() as sess:
@@ -37,6 +37,7 @@ def train():
             print("## restore from the checkpoint {0}".format(checkpoint))
             start_epoch += int(checkpoint.split('-')[-1])
         print('## start training...')
+
         try:
             for epoch in range(start_epoch,FLAG.epochs):
                 n=0
@@ -55,9 +56,9 @@ def train():
             print('## Interrupt manually, try saving checkpoint for now...')
             saver.save(sess, os.path.join(FLAG.result_dir, FLAG.model_prefix), global_step=epoch)
             print('## Last epoch were saved, next time will start from epoch {}.'.format(epoch))
-        saver.save(sess, FLAG.result_dir+'/model/'+"model.ckpt")
-        tf.train.write_graph(sess.graph_def, FLAG.result_dir+'/model/', 'graph.pb')
-        tf.saved_model.simple_save(sess,"./model_simple",inputs={"Input": input_data},outputs={"Output": output_targets})
+        #saver.save(sess, FLAG.result_dir+'/model/'+"model.ckpt")
+        #tf.train.write_graph(sess.graph_def, FLAG.result_dir+'/model/', 'graph.pb')
+        tf.saved_model.simple_save(sess,FLAG.result_dir+"/model_simple", inputs={"Input": input_data},outputs={"Output":  y})
 def main(_):
     train()
 
