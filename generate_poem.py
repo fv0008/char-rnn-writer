@@ -8,7 +8,7 @@ FLAG=FLAGS()
 poems_vector, word_int_map, vocabularies = build_dataset(FLAG.poems_path,FLAG.name_path)
 input_data = tf.placeholder(tf.int32, [1, None])
 end_points = char_rnn(model='lstm', input_data=input_data, output_data=None, vocab_size=len(
-    vocabularies), rnn_size=256, num_layers=3, batch_size=64, learning_rate=FLAG.learning_rate)
+    vocabularies),rnn_size=FLAG.rnn_size,num_layers=FLAG.num_layers,batch_size=FLAG.batch_size, learning_rate=FLAG.learning_rate)
 
 
 def to_word(predict, vocabs):

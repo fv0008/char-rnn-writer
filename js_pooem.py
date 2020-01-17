@@ -27,10 +27,13 @@ def gen_poem(begin_word):
     init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
     with tf.Session() as sess:
         sess.run(init_op)
+        MetaGraphDef = tf.saved_model.loader.load(sess, ["serve"], FLAG.result_dir + "/model_simple")
+        SignatureDef_d = MetaGraphDef.signature_def
+        SignatureDef = SignatureDef_d['serving_default']
 
-        tf.saved_model.loader.load(sess, ["serve"],FLAG.result_dir+"/model_simple")
-        graph = tf.get_default_graph()
-        tf.train.import_meta_graph( graph)
+        output = SignatureDef.outputs['prediction']
+        end_points['prediction'] = tf.saved_model.utils.get_tensor_from_tensor_info(output, sess.graph)
+
 
 
         x = np.array([list(map(word_int_map.get, FLAG.start_token))])

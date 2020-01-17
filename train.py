@@ -20,11 +20,10 @@ def train():
         input_data=input_data,
         output_data=output_targets,
         vocab_size=len(vocabularies),
-        rnn_size=256,
-        num_layers=3,
+        rnn_size=FLAG.rnn_size,
+        num_layers=FLAG.num_layers,
         batch_size=FLAG.batch_size,
         learning_rate=FLAG.learning_rate)
-    y = tf.identity(end_points['prediction'], name="Output")  # 为输出op命名为"Output"
     saver=tf.train.Saver(tf.global_variables())
     init_op=tf.group(tf.global_variables_initializer(),tf.local_variables_initializer())
     with tf.Session() as sess:
@@ -56,9 +55,12 @@ def train():
             print('## Interrupt manually, try saving checkpoint for now...')
             saver.save(sess, os.path.join(FLAG.result_dir, FLAG.model_prefix), global_step=epoch)
             print('## Last epoch were saved, next time will start from epoch {}.'.format(epoch))
+            tf.saved_model.simple_save(sess, FLAG.result_dir + "/model_simple",
+                                       inputs={"Input": input_data},
+                                       outputs={"prediction": end_points['prediction']})
         #saver.save(sess, FLAG.result_dir+'/model/'+"model.ckpt")
         #tf.train.write_graph(sess.graph_def, FLAG.result_dir+'/model/', 'graph.pb')
-        tf.saved_model.simple_save(sess,FLAG.result_dir+"/model_simple", inputs={"Input": input_data},outputs={"Output":  y})
+        tf.saved_model.simple_save(sess,FLAG.result_dir+"/model_simple", inputs={"Input": input_data},outputs={"prediction": end_points['prediction']})
 def main(_):
     train()
 

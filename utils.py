@@ -49,10 +49,10 @@ def build_dataset(poemsfile,namesfile):
     poems=[]
     threadpoems(poemsfile, poems,)
     threadnames(namesfile, poems,)
-    threadnames(namesfile, poems, )
+    #threadnames(namesfile, poems, )
 
 
-    time.sleep(10)
+    #time.sleep(10)
     # print(poems)
     words_list=[word for poem in poems for word in poem] # 两层嵌套，插眼
     # print(words_list)

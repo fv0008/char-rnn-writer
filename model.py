@@ -4,6 +4,8 @@ import numpy as np
 
 # 参数设置
 tf.app.flags.DEFINE_integer('batch_size',64,'batch size.')
+tf.app.flags.DEFINE_integer('num_layers',2,'num_layers.')
+tf.app.flags.DEFINE_integer('rnn_size',128,'rnn_size.')
 tf.app.flags.DEFINE_float('learning_rate',0.0002,'learning rate.')
 tf.app.flags.DEFINE_string('result_dir','result/poem','trained model save path.')
 tf.app.flags.DEFINE_string('poems_path','data/poems.txt','file of poems dataset.')
