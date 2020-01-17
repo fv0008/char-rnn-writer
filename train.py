@@ -57,7 +57,7 @@ def train():
             print('## Last epoch were saved, next time will start from epoch {}.'.format(epoch))
         saver.save(sess, FLAG.result_dir+'/model/'+"model.ckpt")
         tf.train.write_graph(sess.graph_def, FLAG.result_dir+'/model/', 'graph.pb')
-
+        tf.saved_model.simple_save(sess,"./model_simple",inputs={"Input": input_data},outputs={"Output": output_targets})
 def main(_):
     train()
 
