@@ -4,6 +4,7 @@
 result/name
 result/poems
 result/poem
+model_simple/
 checkpoint
 model.ckpt*
 graph.pb
