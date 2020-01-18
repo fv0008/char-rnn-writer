@@ -53,7 +53,7 @@ def gen_poem(begin_word):
             [predict, last_state] = sess.run([end_points['prediction'], end_points['last_state']],
                                              feed_dict={input_data: x, end_points['initial_state']: last_state})
             word = to_word(predict, vocabularies)
-
+        sess.close()
         return poem_
 
 def pretty_print_name(name_):
