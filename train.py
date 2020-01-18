@@ -3,6 +3,8 @@ import numpy as np
 import tensorflow.compat.v1 as tf
 from model import char_rnn,FLAGS
 from utils import build_dataset,build_name_dataset,generate_batch
+from tensorflow.python.saved_model import tag_constants
+from tensorflow.python.saved_model import signature_constants
 tf.disable_eager_execution()
 
 
@@ -55,12 +57,17 @@ def train():
             print('## Interrupt manually, try saving checkpoint for now...')
             saver.save(sess, os.path.join(FLAG.result_dir, FLAG.model_prefix), global_step=epoch)
             print('## Last epoch were saved, next time will start from epoch {}.'.format(epoch))
-            tf.saved_model.simple_save(sess, FLAG.result_dir + "/model_simple",
-                                       inputs={"Input": input_data},
-                                       outputs={"prediction": end_points['prediction']})
         #saver.save(sess, FLAG.result_dir+'/model/'+"model.ckpt")
         #tf.train.write_graph(sess.graph_def, FLAG.result_dir+'/model/', 'graph.pb')
-        tf.saved_model.simple_save(sess,FLAG.result_dir+"/model_simple", inputs={"Input": input_data},outputs={"prediction": end_points['prediction']})
+
+        builder = tf.saved_model.builder.SavedModelBuilder(FLAG.result_dir+"/model_complex")
+        SignatureDef = tf.saved_model.signature_def_utils.build_signature_def(
+            inputs={'input_data':tf.saved_model.utils.build_tensor_info(input_data), 'output_targets': tf.saved_model.utils.build_tensor_info(output_targets)},
+            outputs={'prediction': tf.saved_model.utils.build_tensor_info(end_points['prediction'])})
+        builder.add_meta_graph_and_variables(sess, [tag_constants.TRAINING],
+                                             signature_def_map={tf.saved_model.signature_constants.CLASSIFY_INPUTS: SignatureDef})
+        builder.save()
+
 def main(_):
     train()
 

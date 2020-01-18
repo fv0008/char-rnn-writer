@@ -2,13 +2,15 @@ import tensorflow.compat.v1 as tf
 from model import char_rnn,FLAGS
 from utils import build_dataset
 import numpy as np
+from tensorflow.python.saved_model import tag_constants
+from tensorflow.python.saved_model import signature_constants
 tf.disable_eager_execution()
 
 FLAG=FLAGS()
 poems_vector, word_int_map, vocabularies = build_dataset(FLAG.poems_path,FLAG.name_path)
 input_data = tf.placeholder(tf.int32, [1, None])
 end_points = char_rnn(model='lstm', input_data=input_data, output_data=None, vocab_size=len(
-    vocabularies), rnn_size=256, num_layers=3, batch_size=64, learning_rate=FLAG.learning_rate)
+    vocabularies),rnn_size=FLAG.rnn_size,num_layers=FLAG.num_layers,batch_size=FLAG.batch_size, learning_rate=FLAG.learning_rate)
 
 
 def to_word(predict, vocabs):
@@ -27,13 +29,21 @@ def gen_poem(begin_word):
     init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
     with tf.Session() as sess:
         sess.run(init_op)
-        MetaGraphDef = tf.saved_model.loader.load(sess, ["serve"], FLAG.result_dir + "/model_simple")
+
+        MetaGraphDef = tf.saved_model.loader.load(sess,  [tag_constants.TRAINING], FLAG.result_dir + "/model_complex")
         SignatureDef_d = MetaGraphDef.signature_def
-        SignatureDef = SignatureDef_d['serving_default']
+        SignatureDef = SignatureDef_d[tf.saved_model.signature_constants.CLASSIFY_INPUTS]
 
-        output = SignatureDef.outputs['prediction']
-        end_points['prediction'] = tf.saved_model.utils.get_tensor_from_tensor_info(output, sess.graph)
+        predictionname      = SignatureDef.outputs['prediction'].name
+        #input_dataname       = SignatureDef.inputs['input_data'].name
+        #output_targetsname   = SignatureDef.inputs['output_targets'].name
+        prediction      = sess.graph.get_tensor_by_name(predictionname )
+        #input_data      = sess.graph.get_tensor_by_name(input_dataname )
+        #output_targets  = sess.graph.get_tensor_by_name(output_targetsname)
+        #end_points['prediction'] = prediction
 
+        #checkpoint = tf.train.latest_checkpoint(FLAG.result_dir)
+        #saver.restore(sess, checkpoint)
 
 
         x = np.array([list(map(word_int_map.get, FLAG.start_token))])
