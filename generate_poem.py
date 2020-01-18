@@ -1,14 +1,15 @@
-import tensorflow.compat.v1 as tf
-from model import char_rnn,FLAGS
+import tensorflow as tf
+from model import char_rnn, FLAGS
 from utils import build_dataset
 import numpy as np
-tf.disable_eager_execution()
 
-FLAG=FLAGS()
-poems_vector, word_int_map, vocabularies = build_dataset(FLAG.poems_path,FLAG.name_path)
+
+FLAG = FLAGS()
+poems_vector, word_int_map, vocabularies = build_dataset(FLAG.poems_path, FLAG.name_path)
 input_data = tf.placeholder(tf.int32, [1, None])
 end_points = char_rnn(model='lstm', input_data=input_data, output_data=None, vocab_size=len(
-    vocabularies),rnn_size=FLAG.rnn_size,num_layers=FLAG.num_layers,batch_size=FLAG.batch_size, learning_rate=FLAG.learning_rate)
+    vocabularies), rnn_size=FLAG.rnn_size, num_layers=FLAG.num_layers, batch_size=FLAG.batch_size,
+                      learning_rate=FLAG.learning_rate)
 
 
 def to_word(predict, vocabs):
@@ -22,8 +23,6 @@ def to_word(predict, vocabs):
 
 
 def gen_poem(begin_word):
-
-
     saver = tf.train.Saver(tf.global_variables())
     init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
     with tf.Session() as sess:
@@ -56,10 +55,12 @@ def gen_poem(begin_word):
         sess.close()
         return poem_
 
+
 def pretty_print_name(name_):
-    name= "".join([word for word in name_ if word!='B'])
+    name = "".join([word for word in name_ if word != 'B'])
     print(name)
     return name
+
 
 def pretty_print_poem(poem_):
     poem_sentences = poem_.split('。')
@@ -67,9 +68,8 @@ def pretty_print_poem(poem_):
         if s != '' and len(s) > 10:
             print(s + '。')
 
+
 if __name__ == '__main__':
-
-
 
     count = 0
     while (count < 9):

@@ -1,11 +1,10 @@
 import os
 import numpy as np
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 from model import char_rnn,FLAGS
 from utils import build_dataset,build_name_dataset,generate_batch
 from tensorflow.python.saved_model import tag_constants
 from tensorflow.python.saved_model import signature_constants
-tf.disable_eager_execution()
 
 
 
@@ -15,12 +14,12 @@ def train():
 
     batches_inputs,batches_outputs=generate_batch(FLAG.batch_size,poems_vector,word_to_int)
 
-    input_data=tf.placeholder(tf.int32,[FLAG.batch_size,None],name="Input")
-    output_targets=tf.placeholder(tf.int32,[FLAG.batch_size,None])
+    input_data=tf.compat.v1.placeholder(tf.int32,[FLAG.batch_size,None],name="Input")
+    output_data=tf.compat.v1.placeholder (tf.int32,[FLAG.batch_size,None])
     #z = tf.log(output_targets, name="namemodel")
     end_points=char_rnn(model='lstm',
         input_data=input_data,
-        output_data=output_targets,
+        output_data=output_data,
         vocab_size=len(vocabularies),
         rnn_size=FLAG.rnn_size,
         num_layers=FLAG.num_layers,
@@ -48,7 +47,7 @@ def train():
                         end_points['total_loss'],
                         end_points['last_state'],
                         end_points['train_op']
-                    ], feed_dict={input_data: batches_inputs[n], output_targets: batches_outputs[n]})
+                    ], feed_dict={input_data: batches_inputs[n], output_data: batches_outputs[n]})
                     n += 1
                     print('Epoch: %d, batch: %d, training loss: %.6f' % (epoch, batch, loss))
                 if epoch % 10 == 0:
@@ -60,16 +59,16 @@ def train():
         #saver.save(sess, FLAG.result_dir+'/model/'+"model.ckpt")
         #tf.train.write_graph(sess.graph_def, FLAG.result_dir+'/model/', 'graph.pb')
 
-        builder = tf.saved_model.builder.SavedModelBuilder(FLAG.result_dir+"/model_complex")
-        SignatureDef = tf.saved_model.signature_def_utils.build_signature_def(
-            inputs={'input_data':tf.saved_model.utils.build_tensor_info(input_data), 'output_targets': tf.saved_model.utils.build_tensor_info(output_targets)},
-            outputs={'prediction': tf.saved_model.utils.build_tensor_info(end_points['prediction'])})
-        builder.add_meta_graph_and_variables(sess, [tag_constants.TRAINING],
-                                             signature_def_map={tf.saved_model.signature_constants.CLASSIFY_INPUTS: SignatureDef})
-        builder.save()
+        # builder = tf.saved_model.builder.SavedModelBuilder(FLAG.result_dir+"/model_complex")
+        # SignatureDef = tf.saved_model.signature_def_utils.build_signature_def(
+        #     inputs={'input_data':tf.saved_model.utils.build_tensor_info(input_data), 'output_targets': tf.saved_model.utils.build_tensor_info(output_data)},
+        #     outputs={'prediction': tf.saved_model.utils.build_tensor_info(end_points['prediction'])})
+        # builder.add_meta_graph_and_variables(sess, [tag_constants.TRAINING],
+        #                                      signature_def_map={tf.saved_model.signature_constants.CLASSIFY_INPUTS: SignatureDef})
+        # builder.save()
 
 def main(_):
     train()
 
 if __name__ == '__main__':
-    tf.app.run()
+    tf.compat.v1.app.run()

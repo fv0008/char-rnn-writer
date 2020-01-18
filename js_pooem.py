@@ -1,10 +1,9 @@
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 from model import char_rnn,FLAGS
 from utils import build_dataset
 import numpy as np
 from tensorflow.python.saved_model import tag_constants
 from tensorflow.python.saved_model import signature_constants
-tf.disable_eager_execution()
 
 FLAG=FLAGS()
 poems_vector, word_int_map, vocabularies = build_dataset(FLAG.poems_path,FLAG.name_path)

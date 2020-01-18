@@ -1,4 +1,4 @@
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 import numpy as np
 
 
@@ -36,15 +36,11 @@ def char_rnn(model,input_data,output_data,vocab_size,rnn_size=128,num_layers=2,b
     """
     end_points = {}
 
-    if model == 'rnn':
-        cell_fun =  tf.nn.rnn_cell.BasicRNNCell
-    elif model == 'gru':
-        cell_fun =  tf.nn.rnn_cell.GRUCell
-    elif model == 'lstm':
-        cell_fun =  tf.nn.rnn_cell.BasicLSTMCell
+    if model == 'lstm':
+        cell_fun =  tf.keras.layers.LSTMCell
 
-    cell = cell_fun(rnn_size, state_is_tuple=True)
-    cell = tf.nn.rnn_cell.MultiRNNCell([cell] * num_layers, state_is_tuple=True)
+    cell = cell_fun(rnn_size)
+    cell = tf.keras.layers.StackedRNNCells([cell] * num_layers)
 
     if output_data is not None:
         initial_state = cell.zero_state(batch_size, tf.float32)
